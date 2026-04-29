@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+COMPANY_NAME = 'RUNNER'
+SLOGAN = 'RUN and RELAX'
+CONTACTS = '+7123456789'
 
 # Application definition
 
@@ -37,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'run_app',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
