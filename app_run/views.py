@@ -1,12 +1,15 @@
 from django.contrib.auth.models import User
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from django.conf import settings
+from rest_framework.views import APIView
+
 from .serializers import RunSerializer, UserSerializer
 from .models import Run
-from django.shortcuts import render
+
 
 @api_view(['GET'])
 def company_details(request):
@@ -35,3 +38,35 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif user_type == 'athlete':
             return qs.filter(is_staff=False)
         return qs
+
+
+class RunStartApiView(APIView):
+    def post(self, request, run_id):
+        run = get_object_or_404(Run, pk=run_id)
+        if run.status != 'init':
+            return Response(
+                {"error": "Run cannot be started"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        run.status = 'in_progress'
+        run.save()
+        return Response({
+            "id": run.pk,
+            "status": run.status
+        })
+
+
+class RunStopApiView(APIView):
+    def post(self, request, run_id):
+        run = get_object_or_404(Run, pk=run_id)
+        if run.status != 'in_progress':
+            return Response(
+                {"error": "Run cannot be stopped"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        run.status = 'finished'
+        run.save()
+        return Response({
+            "id": run.pk,
+            "status": run.status
+        })
