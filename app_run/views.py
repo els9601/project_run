@@ -22,7 +22,7 @@ def company_details(request):
     return Response(details)
 
 class UserPagination(PageNumberPagination):
-    page_query_param = 'size'
+    page_size_query_param = 'size'
     max_page_size = 100
 
 class RunPagination(PageNumberPagination):
