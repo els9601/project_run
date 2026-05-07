@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.conf import settings
 from rest_framework.views import APIView
@@ -18,10 +21,21 @@ def company_details(request):
                'contacts': settings.CONTACTS}
     return Response(details)
 
+class UserPagination(PageNumberPagination):
+    page_query_param = 'size'
+    max_page_size = 100
+
+class RunPagination(PageNumberPagination):
+    page_size_query_param = 'size'
+    max_page_size = 100
 
 class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.select_related('athlete')
     serializer_class = RunSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterest_fields = ['status', 'athlete']
+    ordering_fields = ['created_at']
+    pagination_class = RunPagination
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,6 +43,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     filter_backends = [SearchFilter]
     search_fields = ['last_name', 'first_name']
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['date_joined']
+    pagination_class = UserPagination
+
 
     def get_queryset(self):
         qs = super().get_queryset()
